@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="text-center">
+        <div style="display: flex; justify-content: center;">
+            <img src="{{ url_for('static', filename='images/logo1.png') }}" alt="Logo Servicell" class="img-fluid mb-4" style="max-width: 1000px; display: block; margin: 0 auto;">
+        </div>
+
+        <div id="fecha" class="mb-3" style="font-size: 1.5rem;"></div>
+    </div>
+
+    <script>
+        // Mostrar la fecha actual
+        const fechaElemento = document.getElementById('fecha');
+        const opcionesFecha = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        const fechaActual = new Date().toLocaleDateString('es-ES', opcionesFecha);
+        fechaElemento.textContent = fechaActual;
+    </script>
+{% endblock %}

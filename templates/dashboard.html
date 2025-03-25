@@ -1,0 +1,181 @@
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% extends "base.html" %}
+
+{% block content %}
+<div class="p-6 bg-gray-900 text-white min-h-screen">
+    <h1 class="text-3xl font-bold text-center mb-8">Dashboard</h1>
+
+    <!-- Selector de fecha -->
+    <div class="mb-8 text-center">
+        <form action="{{ url_for('dashboard') }}" method="GET" class="inline-block">
+            <label for="fecha_desde" class="text-gray-300">Desde:</label>
+            <input type="date" id="fecha_desde" name="fecha_desde" value="{{ fecha_desde }}" class="ml-2 p-2 bg-gray-700 text-white rounded">
+            <label for="fecha_hasta" class="text-gray-300 ml-4">Hasta:</label>
+            <input type="date" id="fecha_hasta" name="fecha_hasta" value="{{ fecha_hasta }}" class="ml-2 p-2 bg-gray-700 text-white rounded">
+            <button type="submit" class="ml-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition duration-300">Filtrar</button>
+        </form>
+    </div>
+
+    <!-- KPIs -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
+        <!-- KPI: Reparaciones -->
+        <div class="bg-gray-800 p-4 rounded-lg shadow-lg text-center">
+            <h3 class="text-lg font-semibold text-gray-300">Reparaciones</h3>
+            <p class="text-2xl font-bold text-blue-400">${{ total_ventas_reparaciones }}</p>
+        </div>
+
+        <!-- KPI: Productos -->
+        <div class="bg-gray-800 p-4 rounded-lg shadow-lg text-center">
+            <h3 class="text-lg font-semibold text-gray-300">Productos</h3>
+            <p class="text-2xl font-bold text-green-400">${{ total_ventas_productos }}</p>
+        </div>
+
+        <!-- KPI: Ventas Totales -->
+        <div class="bg-gray-800 p-4 rounded-lg shadow-lg text-center">
+            <h3 class="text-lg font-semibold text-gray-300">Ventas Totales</h3>
+            <p class="text-2xl font-bold text-purple-400">${{ total_ventas }}</p>
+        </div>
+
+        <!-- KPI: Egresos -->
+        <div class="bg-gray-800 p-4 rounded-lg shadow-lg text-center">
+            <h3 class="text-lg font-semibold text-gray-300">Egresos</h3>
+            <p class="text-2xl font-bold text-red-400">-${{ total_egresos }}</p>
+        </div>
+
+        <!-- KPI: Costos -->
+        <div class="bg-gray-800 p-4 rounded-lg shadow-lg text-center">
+            <h3 class="text-lg font-semibold text-gray-300">Costos</h3>
+            <p class="text-2xl font-bold text-yellow-400">-${{ total_costo }}</p>
+        </div>
+
+        <!-- KPI: Ganancia Neta -->
+        <div class="bg-gray-800 p-4 rounded-lg shadow-lg text-center">
+            <h3 class="text-lg font-semibold text-gray-300">Ganancia Neta</h3>
+            <p class="text-2xl font-bold text-teal-400">${{ ganancia }}</p>
+        </div>
+    </div>
+
+    <!-- Contenedor para las tablas y gráficos -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Gráfico de resumen -->
+        <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+            <h2 class="text-2xl font-semibold mb-4">Resumen de Ventas y Gastos</h2>
+            <canvas id="resumenChart" class="w-full"></canvas>
+        </div>
+
+        <!-- Gráfico de dona -->
+        <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+            <h2 class="text-2xl font-semibold mb-4">Distribución de Ventas</h2>
+            <canvas id="distribucionVentasChart" class="w-full"></canvas>
+        </div>
+    </div>
+
+    <!-- Botón para volver al inicio -->
+    <div class="mt-8 text-center">
+        <a href="{{ url_for('index') }}" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition duration-300">Volver al Inicio</a>
+    </div>
+
+    <script>
+        // Datos para el gráfico de resumen
+        const dataResumen = {
+            labels: ['Ventas', 'Egresos', 'Costos', 'Ganancia Neta'],
+            datasets: [{
+                label: 'Resumen',
+                data: [{{ total_ventas }}, {{ total_egresos }}, {{ total_costo }}, {{ ganancia }}],
+                backgroundColor: [
+                    'rgba(75, 192, 192, 0.2)',
+                    'rgba(255, 99, 132, 0.2)',
+                    'rgba(255, 206, 86, 0.2)',
+                    'rgba(153, 102, 255, 0.2)'
+                ],
+                borderColor: [
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(153, 102, 255, 1)'
+                ],
+                borderWidth: 1
+            }]
+        };
+
+        // Configuración del gráfico de resumen
+        const configResumen = {
+            type: 'bar',
+            data: dataResumen,
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        },
+                        ticks: {
+                            color: 'white'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        },
+                        ticks: {
+                            color: 'white'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: 'white'
+                        }
+                    }
+                }
+            }
+        };
+
+        // Renderizar el gráfico de resumen
+        const resumenChart = new Chart(
+            document.getElementById('resumenChart'),
+            configResumen
+        );
+
+        // Datos para el gráfico de dona (distribución de ventas)
+        const dataDistribucion = {
+            labels: {{ distribucion_ventas | map(attribute='tipo') | list | tojson }},
+            datasets: [{
+                label: 'Distribución de Ventas',
+                data: {{ distribucion_ventas | map(attribute='total') | list | tojson }},
+                backgroundColor: [
+                    'rgba(75, 192, 192, 0.2)',
+                    'rgba(255, 99, 132, 0.2)'
+                ],
+                borderColor: [
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(255, 99, 132, 1)'
+                ],
+                borderWidth: 1
+            }]
+        };
+
+        // Configuración del gráfico de dona
+        const configDistribucion = {
+            type: 'doughnut',
+            data: dataDistribucion,
+            options: {
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: 'white'
+                        }
+                    }
+                }
+            }
+        };
+
+        // Renderizar el gráfico de dona
+        const distribucionVentasChart = new Chart(
+            document.getElementById('distribucionVentasChart'),
+            configDistribucion
+        );
+    </script>
+</div>
+{% endblock %}

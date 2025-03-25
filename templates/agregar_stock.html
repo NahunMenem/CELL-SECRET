@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="p-6 bg-gray-900 text-white min-h-screen">
+    <h1 class="text-3xl font-bold text-center mb-8">Agregar Stock</h1>
+
+    <!-- Formulario para agregar un nuevo producto -->
+    <div class="bg-gray-800 p-6 rounded-lg shadow-lg mb-8">
+        <h2 class="text-2xl font-semibold mb-4">Agregar Nuevo Producto</h2>
+        <form method="POST">
+            <div class="mb-4">
+                <label for="nombre" class="block text-gray-300 mb-2">Nombre:</label>
+                <input type="text" id="nombre" name="nombre" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500" required>
+            </div>
+            <div class="mb-4">
+                <label for="codigo_barras" class="block text-gray-300 mb-2">Código de Barras:</label>
+                <input type="text" id="codigo_barras" name="codigo_barras" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500" required>
+            </div>
+            <div class="mb-4">
+                <label for="stock" class="block text-gray-300 mb-2">Stock:</label>
+                <input type="number" id="stock" name="stock" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500" required>
+            </div>
+            <div class="mb-4">
+                <label for="precio" class="block text-gray-300 mb-2">Precio de Venta:</label>
+                <input type="number" step="0.01" id="precio" name="precio" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500" required>
+            </div>
+            <div class="mb-4">
+                <label for="precio_costo" class="block text-gray-300 mb-2">Precio de Costo:</label>
+                <input type="number" step="0.01" id="precio_costo" name="precio_costo" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500" required>
+            </div>
+            <button type="submit" name="agregar" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition duration-300">Agregar Producto</button>
+        </form>
+    </div>
+
+    <!-- Barra de búsqueda -->
+    <div class="bg-gray-800 p-6 rounded-lg shadow-lg mb-8">
+        <h2 class="text-2xl font-semibold mb-4">Buscar Producto</h2>
+        <form method="GET" action="{{ url_for('agregar_stock') }}">
+            <input type="text" name="busqueda" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500" placeholder="Buscar por nombre o código de barras..." value="{{ busqueda }}">
+            <button type="submit" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition duration-300 mt-2">Buscar</button>
+        </form>
+    </div>
+
+    <!-- Tabla de productos existentes -->
+    <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+        <h2 class="text-2xl font-semibold mb-4">Productos Existentes</h2>
+        <div class="overflow-x-auto">
+            <table class="min-w-full bg-gray-700 rounded-lg">
+                <thead>
+                    <tr class="bg-gray-600">
+                        <th class="px-4 py-2 text-left">ID</th>
+                        <th class="px-4 py-2 text-left">Nombre</th>
+                        <th class="px-4 py-2 text-left">Código de Barras</th>
+                        <th class="px-4 py-2 text-left">Stock</th>
+                        <th class="px-4 py-2 text-left">Precio de Venta</th>
+                        <th class="px-4 py-2 text-left">Precio de Costo</th>
+                        <th class="px-4 py-2 text-left">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for producto in productos %}
+                    <tr class="border-b border-gray-600 hover:bg-gray-650 transition duration-200">
+                        <td class="px-4 py-2">{{ producto.id }}</td>
+                        <td class="px-4 py-2">{{ producto.nombre }}</td>
+                        <td class="px-4 py-2">{{ producto.codigo_barras }}</td>
+                        <td class="px-4 py-2">{{ producto.stock }}</td>
+                        <td class="px-4 py-2">${{ producto.precio }}</td>
+                        <td class="px-4 py-2">${{ producto.precio_costo }}</td>
+                        <td class="px-4 py-2">
+    
+
+                            {% if session.get('role') == 'admin' %}
+                            <!-- Botón para editar -->
+                            <button type="button" class="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg transition duration-300" data-bs-toggle="modal" data-bs-target="#editarModal{{ producto.id }}">
+                                Editar
+                            </button>
+                            {% endif %}
+                            <!-- Botón para eliminar con confirmación -->
+                            <form method="POST" class="inline" onsubmit="return confirmarEliminacion()">
+                                <input type="hidden" name="producto_id" value="{{ producto.id }}">
+                                {% if session.get('role') == 'admin' %}
+                                <button type="submit" name="eliminar" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition duration-300">Eliminar</button>
+                                {% endif %}
+                            </form>
+                            <!-- Botón para sumar stock -->
+
+                            {% if session.get('role') == 'user' %}
+                            <form method="POST" class="inline">
+                                <input type="hidden" name="producto_id" value="{{ producto.id }}">
+                                <input type="number" name="cantidad" class="w-16 p-1 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500" min="1" required>
+                                <button type="submit" name="agregar_stock" class="px-2 py-1 bg-green-600 hover:bg-green-700 text-white rounded-lg transition duration-300">+ Stock</button>
+                            </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+
+                    <!-- Modal para editar -->
+                    <div class="modal fade" id="editarModal{{ producto.id }}" tabindex="-1" aria-labelledby="editarModalLabel{{ producto.id }}" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content bg-gray-800 text-white">
+                                <div class="modal-header">
+                                    <h5 class="modal-title text-xl font-semibold" id="editarModalLabel{{ producto.id }}">Editar Producto</h5>
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <form method="POST">
+                                        <input type="hidden" name="producto_id" value="{{ producto.id }}">
+                                        <div class="mb-4">
+                                            <label for="nombre{{ producto.id }}" class="block text-gray-300 mb-2">Nombre:</label>
+                                            <input type="text" id="nombre{{ producto.id }}" name="nombre" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500" value="{{ producto.nombre }}" required>
+                                        </div>
+                                        <div class="mb-4">
+                                            <label for="codigo_barras{{ producto.id }}" class="block text-gray-300 mb-2">Código de Barras:</label>
+                                            <input type="text" id="codigo_barras{{ producto.id }}" name="codigo_barras" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500" value="{{ producto.codigo_barras }}" required>
+                                        </div>
+                                        <div class="mb-4">
+                                            <label for="stock{{ producto.id }}" class="block text-gray-300 mb-2">Stock:</label>
+                                            <input type="number" id="stock{{ producto.id }}" name="stock" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500" value="{{ producto.stock }}" required>
+                                        </div>
+                                        <div class="mb-4">
+                                            <label for="precio{{ producto.id }}" class="block text-gray-300 mb-2">Precio de Venta:</label>
+                                            <input type="number" step="0.01" id="precio{{ producto.id }}" name="precio" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500" value="{{ producto.precio }}" required>
+                                        </div>
+                                        <div class="mb-4">
+                                            <label for="precio_costo{{ producto.id }}" class="block text-gray-300 mb-2">Precio de Costo:</label>
+                                            <input type="number" step="0.01" id="precio_costo{{ producto.id }}" name="precio_costo" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500" value="{{ producto.precio_costo }}" required>
+                                        </div>
+                                        <button type="submit" name="editar" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition duration-300">Guardar Cambios</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Botón para volver al inicio -->
+    <div class="mt-8 text-center">
+        <a href="{{ url_for('index') }}" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition duration-300">Volver al Inicio</a>
+    </div>
+</div>
+
+<!-- Script para confirmar la eliminación -->
+<script>
+    function confirmarEliminacion() {
+        return confirm('¿Estás seguro de que deseas eliminar este producto?');
+    }
+</script>
+{% endblock %}

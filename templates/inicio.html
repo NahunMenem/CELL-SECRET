@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="flex flex-col md:flex-row">
+        <!-- Contenido principal -->
+        <div class="flex-1 p-4 md:p-8">
+            <h1 class="text-xl md:text-2xl font-bold mb-4 md:mb-6">Bienvenido, {{ session.get('username')|upper }}</h1>
+            <p class="text-gray-300 text-sm md:text-base">Selecciona una opción del menú para comenzar.</p>
+        </div>
+    </div>
+
+    <!-- Imagen y fecha -->
+    <div class="text-center mt-4 md:mt-8">
+        <!-- Contenedor de la imagen -->
+        <div class="flex justify-center">
+            <img src="{{ url_for('static', filename='images/logo1.png') }}" alt="Logo Servicell" 
+                 class="w-full max-w-2xl md:max-w-4xl lg:max-w-6xl">
+        </div>
+
+        <!-- Fecha -->
+        <div id="fecha" class="mt-4 text-lg md:text-xl lg:text-2xl"></div>
+    </div>
+
+    <script>
+        // Mostrar la fecha actual
+        const fechaElemento = document.getElementById('fecha');
+        const opcionesFecha = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        const fechaActual = new Date().toLocaleDateString('es-ES', opcionesFecha);
+        fechaElemento.textContent = fechaActual;
+    </script>
+{% endblock %}

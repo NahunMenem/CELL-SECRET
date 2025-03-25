@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="p-6 bg-gray-900 text-white min-h-screen">
+    <h1 class="text-3xl font-bold text-center mb-8">Productos por Agotarse</h1>
+
+    <!-- Tarjeta con la tabla de productos -->
+    <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+        <h2 class="text-2xl font-semibold mb-4">Productos con Stock ≤ 2</h2>
+        <div class="overflow-x-auto">
+            <table class="min-w-full bg-gray-700 rounded-lg">
+                <thead>
+                    <tr class="bg-gray-600">
+                        <th class="px-4 py-2 text-left">ID</th>
+                        <th class="px-4 py-2 text-left">Nombre</th>
+                        <th class="px-4 py-2 text-left">Código de Barras</th>
+                        <th class="px-4 py-2 text-left">Stock</th>
+                        <th class="px-4 py-2 text-left">Precio de Venta</th>
+                        <th class="px-4 py-2 text-left">Precio de Costo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for producto in productos %}
+                    <tr class="border-b border-gray-600 hover:bg-gray-650 transition duration-200">
+                        <td class="px-4 py-2">{{ producto.id }}</td>
+                        <td class="px-4 py-2">{{ producto.nombre }}</td>
+                        <td class="px-4 py-2">{{ producto.codigo_barras }}</td>
+                        <td class="px-4 py-2">{{ producto.stock }}</td>
+                        <td class="px-4 py-2">${{ producto.precio }}</td>
+                        <td class="px-4 py-2">${{ producto.precio_costo }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Botón para volver al inicio -->
+    <div class="mt-8 text-center">
+        <a href="{{ url_for('index') }}" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition duration-300">Volver al Inicio</a>
+    </div>
+</div>
+{% endblock %}

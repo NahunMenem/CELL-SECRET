@@ -1,0 +1,218 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="p-6 bg-gray-900 text-white min-h-screen">
+    <h1 class="text-3xl font-bold text-center mb-8">Transacciones del Día ({{ fecha_actual }})</h1>
+
+    <!-- Formulario de Filtrado por Fecha -->
+    {% if session.get('role') == 'admin' %}
+    <div class="mb-8">
+        <h2 class="text-2xl font-semibold mb-4">Filtrar por Fecha</h2>
+        <form action="{{ url_for('ultimas_ventas') }}" method="get" class="bg-gray-800 p-6 rounded-lg shadow-lg">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                    <label for="fecha_desde" class="block text-sm font-medium mb-2">Desde:</label>
+                    <input type="date" id="fecha_desde" name="fecha_desde" value="{{ fecha_desde }}" class="w-full p-2 rounded bg-gray-700 text-white">
+                </div>
+                <div>
+                    <label for="fecha_hasta" class="block text-sm font-medium mb-2">Hasta:</label>
+                    <input type="date" id="fecha_hasta" name="fecha_hasta" value="{{ fecha_hasta }}" class="w-full p-2 rounded bg-gray-700 text-white">
+                </div>
+                <div class="flex items-end">
+                    <button type="submit" class="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition duration-300">Filtrar</button>
+                </div>
+                <div class="flex items-end">
+                    <a href="{{ url_for('ultimas_ventas', fecha_desde=fecha_desde, fecha_hasta=fecha_hasta, exportar=True) }}" 
+                       class="w-full px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition duration-300 text-center flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        Exportar Excel
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+    {% endif %}
+
+    <!-- Sección de Totales por Tipo de Pago -->
+    <div class="mb-8">
+        <h2 class="text-2xl font-semibold mb-4">Totales por Tipo de Pago</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Totales de Ventas -->
+            <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+                <h3 class="text-xl font-semibold mb-4">Ventas</h3>
+                <ul>
+                    {% for tipo_pago, total in total_ventas_por_pago.items() %}
+                    <li class="mb-2">
+                        <span class="font-medium">{{ tipo_pago }}:</span> ${{ total }}
+                    </li>
+                    {% else %}
+                    <li>No hay ventas registradas en este rango de fechas.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <!-- Totales de Reparaciones -->
+            <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+                <h3 class="text-xl font-semibold mb-4">Reparaciones</h3>
+                <ul>
+                    {% for tipo_pago, total in total_reparaciones_por_pago.items() %}
+                    <li class="mb-2">
+                        <span class="font-medium">{{ tipo_pago }}:</span> ${{ total }}
+                    </li>
+                    {% else %}
+                    <li>No hay reparaciones registradas en este rango de fechas.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sección de Ventas -->
+    <div class="mb-8">
+        <h2 class="text-2xl font-semibold mb-4">Ventas</h2>
+        <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+            <div class="overflow-x-auto">
+                <table class="min-w-full bg-gray-700 rounded-lg">
+                    <thead>
+                        <tr class="bg-gray-600">
+                            <th class="px-4 py-2 text-left">Producto</th>
+                            <th class="px-4 py-2 text-left">Cantidad</th>
+                            <th class="px-4 py-2 text-left">Precio Unitario</th>
+                            <th class="px-4 py-2 text-left">Total</th>
+                            <th class="px-4 py-2 text-left">Fecha</th>
+                            <th class="px-4 py-2 text-left">Tipo de Pago</th>
+                            <th class="px-4 py-2 text-left">DNI Cliente</th>
+                            <th class="px-4 py-2 text-left">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for venta in ventas %}
+                        <tr class="border-b border-gray-600 hover:bg-gray-650 transition duration-200">
+                            <td class="px-4 py-2">{{ venta.nombre_producto }}</td>
+                            <td class="px-4 py-2">{{ venta.cantidad }}</td>
+                            <td class="px-4 py-2">${{ venta.precio_unitario }}</td>
+                            <td class="px-4 py-2">${{ venta.total }}</td>
+                            <td class="px-4 py-2">{{ venta.fecha }}</td>
+                            <td class="px-4 py-2">{{ venta.tipo_pago }}</td>
+                            <td class="px-4 py-2">{{ venta.dni_cliente or '' }}</td>
+                            <td class="px-4 py-2">
+                                {% if session.get('role') == 'admin' %}
+                                <button onclick="anularVenta({{ venta.venta_id }})" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition duration-300">
+                                    Anular
+                                </button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="9" class="px-4 py-2 text-center">No hay ventas registradas en este rango de fechas.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sección de Reparaciones -->
+    <div>
+        <h2 class="text-2xl font-semibold mb-4">Reparaciones</h2>
+        <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+            <div class="overflow-x-auto">
+                <table class="min-w-full bg-gray-700 rounded-lg">
+                    <thead>
+                        <tr class="bg-gray-600">
+                            <th class="px-4 py-2 text-left">Servicio</th>
+                            <th class="px-4 py-2 text-left">Cantidad</th>
+                            <th class="px-4 py-2 text-left">Precio Unitario</th>
+                            <th class="px-4 py-2 text-left">Total</th>
+                            <th class="px-4 py-2 text-left">Fecha</th>
+                            <th class="px-4 py-2 text-left">Tipo de Pago</th>
+                            <th class="px-4 py-2 text-left">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for reparacion in reparaciones %}
+                        <tr class="border-b border-gray-600 hover:bg-gray-650 transition duration-200">
+                            <td class="px-4 py-2">{{ reparacion.nombre_servicio }}</td>
+                            <td class="px-4 py-2">{{ reparacion.cantidad }}</td>
+                            <td class="px-4 py-2">${{ reparacion.precio_unitario }}</td>
+                            <td class="px-4 py-2">${{ reparacion.total }}</td>
+                            <td class="px-4 py-2">{{ reparacion.fecha }}</td>
+                            <td class="px-4 py-2">{{ reparacion.tipo_pago }}</td>
+                            <td class="px-4 py-2">
+                                {% if session.get('role') == 'admin' %}
+                                <button onclick="anularReparacion({{ reparacion.reparacion_id }})" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition duration-300">
+                                    Anular
+                                </button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="7" class="px-4 py-2 text-center">No hay reparaciones registradas en este rango de fechas.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Botón para volver al inicio -->
+    <div class="mt-8 text-center">
+        <a href="{{ url_for('index') }}" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition duration-300">Volver al Inicio</a>
+    </div>
+</div>
+
+<!-- Script para anular ventas y reparaciones -->
+<script>
+    function anularVenta(venta_id) {
+        if (confirm('¿Estás seguro de que deseas anular esta venta?')) {
+            fetch(`/anular_venta/${venta_id}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Venta anulada correctamente');
+                    location.reload();
+                } else {
+                    alert('Error al anular la venta: ' + data.message);
+                }
+            })
+            .catch(error => {
+                alert('Error al anular la venta: ' + error.message);
+            });
+        }
+    }
+
+    function anularReparacion(reparacion_id) {
+        if (confirm('¿Estás seguro de que deseas anular esta reparación?')) {
+            fetch(`/anular_reparacion/${reparacion_id}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Reparación anulada correctamente');
+                    location.reload();
+                } else {
+                    alert('Error al anular la reparación: ' + data.message);
+                }
+            })
+            .catch(error => {
+                alert('Error al anular la reparación: ' + error.message);
+            });
+        }
+    }
+</script>
+{% endblock %}

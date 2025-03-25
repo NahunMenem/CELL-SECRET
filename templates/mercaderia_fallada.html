@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="p-6 bg-gray-900 text-white min-h-screen">
+    <h1 class="text-3xl font-bold mb-6">Mercadería Fallada</h1>
+
+    <!-- Formulario de búsqueda -->
+    <form method="POST" class="mb-8">
+        <div class="flex items-center space-x-4">
+            <input type="text" name="busqueda" class="w-full p-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500" placeholder="Buscar producto por nombre o código de barras">
+            <button type="submit" name="buscar" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition duration-300">Buscar</button>
+        </div>
+    </form>
+
+    <!-- Resultados de búsqueda -->
+    {% if productos %}
+        <h2 class="text-2xl font-semibold mb-4">Resultados de la búsqueda</h2>
+        <div class="overflow-x-auto">
+            <table class="min-w-full bg-gray-800 border border-gray-700 rounded-lg">
+                <thead>
+                    <tr class="bg-gray-700">
+                        <th class="px-4 py-2 text-left">Nombre</th>
+                        <th class="px-4 py-2 text-left">Código de Barras</th>
+                        <th class="px-4 py-2 text-left">Stock</th>
+                        <th class="px-4 py-2 text-left">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for producto in productos %}
+                        <tr class="border-b border-gray-700 hover:bg-gray-750 transition duration-200">
+                            <td class="px-4 py-2">{{ producto.nombre }}</td>
+                            <td class="px-4 py-2">{{ producto.codigo_barras }}</td>
+                            <td class="px-4 py-2">{{ producto.stock }}</td>
+                            <td class="px-4 py-2">
+                                <form method="POST" class="flex items-center space-x-2">
+                                    <input type="hidden" name="producto_id" value="{{ producto.id }}">
+                                    <input type="number" name="cantidad" class="w-20 p-1 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-500" placeholder="Cantidad" min="1" max="{{ producto.stock }}" required>
+                                    <input type="text" name="descripcion" class="w-48 p-1 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500" placeholder="Descripción">
+                                    <button type="submit" name="registrar_fallada" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition duration-300">Marcar como Fallada</button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
+
+    <!-- Historial de mercadería fallada -->
+    <h2 class="text-2xl font-semibold mt-8 mb-4">Historial de Mercadería Fallada</h2>
+    <div class="overflow-x-auto">
+        <table class="min-w-full bg-gray-800 border border-gray-700 rounded-lg">
+            <thead>
+                <tr class="bg-gray-700">
+                    <th class="px-4 py-2 text-left">Producto</th>
+                    <th class="px-4 py-2 text-left">Cantidad</th>
+                    <th class="px-4 py-2 text-left">Fecha</th>
+                    <th class="px-4 py-2 text-left">Descripción</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in historial %}
+                    <tr class="border-b border-gray-700 hover:bg-gray-750 transition duration-200">
+                        <td class="px-4 py-2">{{ item.nombre }}</td>
+                        <td class="px-4 py-2">{{ item.cantidad }}</td>
+                        <td class="px-4 py-2">{{ item.fecha }}</td>
+                        <td class="px-4 py-2">{{ item.descripcion }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,235 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="container mx-auto p-4">
+        <h1 class="text-2xl font-bold text-center mb-6 text-white">Registrar Reparación</h1>
+        
+        <!-- Formulario de Reparación -->
+        <form class="bg-gray-800 shadow-md rounded px-8 pt-6 pb-8 mb-4" method="POST" action="{{ url_for('reparaciones') }}">
+            <!-- Tipo de Reparación -->
+            <div class="mb-4">
+                <label class="block text-gray-300 text-sm font-bold mb-2" for="tipo_reparacion">
+                    Tipo de Reparación
+                </label>
+                <select id="tipo_reparacion" name="tipo_reparacion" class="shadow border rounded w-full py-2 px-3 bg-gray-700 text-gray-300 leading-tight focus:outline-none focus:shadow-outline">
+                    <option value="modulo">Módulo</option>
+                    <option value="pin de carga">Pin de Carga</option>
+                    <option value="Tratamiento humedad">Tratamiento humedad</option>
+                    <option value="glass">Glass</option>
+                    <option value="Tratamiento humedad">Tratamiento humedad</option>
+                    <option value="Soft">Soft</option>
+                    <option value="otros">Otros</option>
+                </select>
+            </div>
+
+            <!-- Equipo -->
+            <div class="mb-4">
+                <label class="block text-gray-300 text-sm font-bold mb-2" for="equipo">
+                    Equipo
+                </label>
+                <select id="equipo" name="equipo" class="shadow border rounded w-full py-2 px-3 bg-gray-700 text-gray-300 leading-tight focus:outline-none focus:shadow-outline">
+                    <option value="alcatel">Alcatel</option>
+                    <option value="huawei">Huawei</option>
+                    <option value="iphone">iPhone</option>
+                    <option value="lg">LG</option>
+                    <option value="motorola">Motorola</option>
+                    <option value="nokia">Nokia</option>
+                    <option value="samsung">Samsung</option>
+                    <option value="tcl">TCL</option>
+                    <option value="xiaomi">Xiaomi</option>                    
+                </select>
+            </div>
+
+            <!-- Modelo -->
+            <div class="mb-4">
+                <label class="block text-gray-300 text-sm font-bold mb-2" for="modelo">
+                    Modelo
+                </label>
+                <input type="text" id="modelo" name="modelo" class="shadow appearance-none border rounded w-full py-2 px-3 bg-gray-700 text-gray-300 leading-tight focus:outline-none focus:shadow-outline" placeholder="Ingrese el modelo">
+            </div>
+
+            <!-- Técnico -->
+            <div class="mb-4">
+                <label class="block text-gray-300 text-sm font-bold mb-2" for="tecnico">
+                    Técnico
+                </label>
+                <select id="tecnico" name="tecnico" class="shadow border rounded w-full py-2 px-3 bg-gray-700 text-gray-300 leading-tight focus:outline-none focus:shadow-outline">
+                    <option value="pablo">Pablo</option>
+                    <option value="lucas">Lucas</option>
+                    <option value="otro">Otro</option>
+                </select>
+            </div>
+
+            <!-- Monto -->
+            <div class="mb-4">
+                <label class="block text-gray-300 text-sm font-bold mb-2" for="monto">
+                    Monto
+                </label>
+                <input type="number" id="monto" name="monto" class="shadow appearance-none border rounded w-full py-2 px-3 bg-gray-700 text-gray-300 leading-tight focus:outline-none focus:shadow-outline" placeholder="Ingrese el monto">
+            </div>
+
+            <!-- Nombre del Cliente -->
+            <div class="mb-4">
+                <label class="block text-gray-300 text-sm font-bold mb-2" for="nombre_cliente">
+                    Nombre del Cliente
+                </label>
+                <input type="text" id="nombre_cliente" name="nombre_cliente" class="shadow appearance-none border rounded w-full py-2 px-3 bg-gray-700 text-gray-300 leading-tight focus:outline-none focus:shadow-outline" placeholder="Ingrese el nombre del cliente">
+            </div>
+
+            <!-- Número de Teléfono -->
+            <div class="mb-4">
+                <label class="block text-gray-300 text-sm font-bold mb-2" for="telefono">
+                    Número de Teléfono
+                </label>
+                <input type="tel" id="telefono" name="telefono" class="shadow appearance-none border rounded w-full py-2 px-3 bg-gray-700 text-gray-300 leading-tight focus:outline-none focus:shadow-outline" placeholder="Ingrese el número de teléfono">
+            </div>
+
+            <!-- Número de Orden -->
+            <div class="mb-6">
+                <label class="block text-gray-300 text-sm font-bold mb-2" for="nro_orden">
+                    Número de Orden
+                </label>
+                <input type="text" id="nro_orden" name="nro_orden" class="shadow appearance-none border rounded w-full py-2 px-3 bg-gray-700 text-gray-300 leading-tight focus:outline-none focus:shadow-outline" placeholder="Ingrese el número de orden">
+            </div>
+
+            <!-- Botón de Enviar -->
+            <div class="flex items-center justify-between">
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                    Registrar Reparación
+                </button>
+            </div>
+        </form>
+
+        <!-- Filtro de Fecha -->
+        <div class="bg-gray-800 shadow-md rounded px-8 pt-6 pb-8 mb-4">
+            <h2 class="text-xl font-bold text-center mb-6 text-white">Filtrar por Fecha</h2>
+            <form method="GET" action="{{ url_for('reparaciones') }}" class="flex flex-wrap justify-center gap-4">
+                <div>
+                    <label class="block text-gray-300 text-sm font-bold mb-2" for="fecha_desde">
+                        Desde
+                    </label>
+                    <input type="date" id="fecha_desde" name="fecha_desde" class="shadow appearance-none border rounded py-2 px-3 bg-gray-700 text-gray-300 leading-tight focus:outline-none focus:shadow-outline" value="{{ fecha_desde }}">
+                </div>
+                <div>
+                    <label class="block text-gray-300 text-sm font-bold mb-2" for="fecha_hasta">
+                        Hasta
+                    </label>
+                    <input type="date" id="fecha_hasta" name="fecha_hasta" class="shadow appearance-none border rounded py-2 px-3 bg-gray-700 text-gray-300 leading-tight focus:outline-none focus:shadow-outline" value="{{ fecha_hasta }}">
+                </div>
+                <div class="flex items-end">
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                        Filtrar
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Resumen de Equipos por Técnico -->
+        <div class="bg-gray-800 shadow-md rounded px-8 pt-6 pb-8 mb-4">
+            <h2 class="text-xl font-bold text-center mb-6 text-white">Equipos por Técnico</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {% for tecnico, cantidad in equipos_por_tecnico.items() %}
+                    <div class="bg-gray-700 p-4 rounded-lg">
+                        <h3 class="text-lg font-bold text-white">{{ tecnico }}</h3>
+                        <p class="text-gray-300">Equipos asignados: {{ cantidad }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Últimos Teléfonos Cargados -->
+        <div class="bg-gray-800 shadow-md rounded px-8 pt-6 pb-8 mb-4">
+            <h2 class="text-xl font-bold text-center mb-6 text-white">Últimos Teléfonos Cargados</h2>
+            <div class="overflow-x-auto">
+                <table class="min-w-full bg-gray-700 text-gray-300">
+                    <thead>
+                        <tr>
+                            <th class="px-4 py-2">Tipo Reparación</th>
+                            <th class="px-4 py-2">Marca</th>
+                            <th class="px-4 py-2">Modelo</th>
+                            <th class="px-4 py-2">Técnico</th>
+                            <th class="px-4 py-2">Monto</th>
+                            <th class="px-4 py-2">Cliente</th>
+                            <th class="px-4 py-2">Teléfono</th>
+                            <th class="px-4 py-2">N° Orden</th>
+                            <th class="px-4 py-2">Fecha</th>
+                            <th class="px-4 py-2">Estado</th>
+                            <th class="px-4 py-2">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for equipo in ultimos_equipos %}
+                            <tr>
+                                <td class="border px-4 py-2">{{ equipo.tipo_reparacion }}</td>
+                                <td class="border px-4 py-2">{{ equipo.marca }}</td>
+                                <td class="border px-4 py-2">{{ equipo.modelo }}</td>
+                                <td class="border px-4 py-2">{{ equipo.tecnico }}</td>
+                                <td class="border px-4 py-2">{{ equipo.monto }}</td>
+                                <td class="border px-4 py-2">{{ equipo.nombre_cliente }}</td>
+                                <td class="border px-4 py-2">{{ equipo.telefono }}</td>
+                                <td class="border px-4 py-2">{{ equipo.nro_orden }}</td>
+                                <td class="border px-4 py-2">{{ equipo.fecha }}</td>
+                                <td class="border px-4 py-2">
+                                    <select class="estado-reparacion bg-gray-700 text-gray-300 rounded" data-telefono="{{ equipo.telefono }}" data-nro-orden="{{ equipo.nro_orden }}">
+                                        <option value="por_reparar" {% if equipo.estado == 'por_reparar' %}selected{% endif %}>Por reparar</option>
+                                        <option value="en_reparacion" {% if equipo.estado == 'en_reparacion' %}selected{% endif %}>En reparación</option>
+                                        <option value="listo" {% if equipo.estado == 'listo' %}selected{% endif %}>Listo</option>
+                                        <option value="Retirado" {% if equipo.estado == 'Retirado' %}selected{% endif %}>Retirado</option>
+                                        <option value="No salio" {% if equipo.estado == 'No salio' %}selected{% endif %}>No salio</option>
+                                    </select>
+                                </td>
+                                <td class="border px-4 py-2">
+                                    <!-- Formulario para eliminar -->
+                                    <form action="{{ url_for('eliminar_reparacion', id=equipo.id) }}" method="POST" onsubmit="return confirm('¿Estás seguro de que deseas eliminar este equipo?');">
+                                        <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline">
+                                            Eliminar
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script para manejar el cambio de estado y enviar WhatsApp -->
+    <script>
+        document.querySelectorAll('.estado-reparacion').forEach(select => {
+            select.addEventListener('change', function() {
+                const estado = this.value;
+                const telefono = this.getAttribute('data-telefono');
+                const nroOrden = this.getAttribute('data-nro-orden');
+
+                if (estado === 'listo') {
+                    // Mensaje de WhatsApp
+                    const mensaje = `Hola, Nos comunicamos de Cell-Secret tu equipo con número de orden ${nroOrden} está listo para ser retirado. ¡Gracias por confiar en nosotros!`;
+                    const urlWhatsApp = `https://wa.me/${telefono}?text=${encodeURIComponent(mensaje)}`;
+
+                    // Abrir WhatsApp en una nueva pestaña
+                    window.open(urlWhatsApp, '_blank');
+                }
+
+                // Aquí puedes agregar una llamada a tu backend para actualizar el estado en la base de datos
+                fetch('/actualizar_estado', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        nro_orden: nroOrden,
+                        estado: estado
+                    }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Estado actualizado:', data);
+                })
+                .catch(error => {
+                    console.error('Error al actualizar el estado:', error);
+                });
+            });
+        });
+    </script>
+{% endblock %}

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema - Servicell</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Favicon estándar para navegadores -->
+    <link rel="icon" type="image/x-icon" href="/static/images/icono.ico">
+    <!-- Icono para dispositivos iOS (iPhone, iPad) -->
+    <link rel="apple-touch-icon" href="/static/images/icono.png">
+    <!-- Font Awesome CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #121212;
+            color: #ffffff;
+        }
+
+        .bg-light {
+            background-color: #1e1e1e !important;
+            border-color: #333333 !important;
+        }
+
+        .list-group-item {
+            background-color: #1e1e1e;
+            color: #ffffff;
+            border-color: #333333;
+        }
+
+        .list-group-item-action:hover {
+            background-color: #333333;
+            color: #ffffff;
+        }
+
+        .sidebar-heading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 150px;
+            padding: 20px;
+        }
+
+        .sidebar-heading img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* Estilos para el botón de toggle en móviles */
+        #sidebarToggle {
+            display: none; /* Oculto por defecto */
+        }
+
+        @media (max-width: 768px) {
+            #sidebarToggle {
+                display: block; /* Mostrar en móviles */
+                position: fixed;
+                top: 10px;
+                left: 10px;
+                z-index: 1000;
+            }
+
+            #sidebar-wrapper {
+                position: fixed;
+                top: 0;
+                left: -250px; /* Ocultar el sidebar por defecto */
+                height: 100vh;
+                width: 250px;
+                transition: left 0.3s ease;
+                z-index: 999;
+            }
+
+            #sidebar-wrapper.active {
+                left: 0; /* Mostrar el sidebar */
+            }
+
+            #page-content-wrapper {
+                margin-left: 0; /* Ajustar el contenido cuando el sidebar está oculto */
+            }
+        }
+
+        .list-group-item-logout {
+            background-color: #ff4d4d;
+            color: #ffffff;
+        }
+
+        .list-group-item-logout:hover {
+            background-color: #ff1a1a;
+            color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+    <div class="d-flex" id="wrapper">
+        <!-- Botón para mostrar/ocultar el sidebar en móviles -->
+        <button id="sidebarToggle" class="btn btn-dark">
+            <i class="fas fa-bars"></i>
+        </button>
+
+        <!-- Sidebar -->
+        <div class="bg-light border-right" id="sidebar-wrapper">
+            <div class="sidebar-heading">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo Servicell" style="max-width: 150px;">
+            </div>
+            
+            <div class="list-group list-group-flush">
+                <a href="{{ url_for('agregar_stock') }}" class="list-group-item list-group-item-action">
+                    <i class="fas fa-boxes me-2"></i> Agregar Stock
+                </a>
+                <a href="{{ url_for('registrar_venta') }}" class="list-group-item list-group-item-action">
+                    <i class="fas fa-cash-register me-2"></i> Registrar Venta
+                </a>
+                <a href="{{ url_for('ultimas_ventas') }}" class="list-group-item list-group-item-action">
+                    <i class="fas fa-history me-2"></i> Últimas Transacciones del Día
+                </a>
+                <a href="{{ url_for('egresos') }}" class="list-group-item list-group-item-action">
+                    <i class="fas fa-money-bill-wave me-2"></i> Gestionar Egresos
+                </a>
+                {% if session.get('role') == 'admin' %}
+                <a href="{{ url_for('dashboard') }}" class="list-group-item list-group-item-action">
+                    <i class="fas fa-chart-line me-2"></i> Dashboard
+                </a>
+                {% endif %}
+                <a href="{{ url_for('productos_por_agotarse') }}" class="list-group-item list-group-item-action">
+                    <i class="fas fa-exclamation-triangle me-2"></i> Productos por Agotarse
+                </a>
+                <a href="{{ url_for('caja') }}" class="list-group-item list-group-item-action">
+                    <i class="fas fa-calculator me-2"></i> Caja
+                </a>
+                <a href="{{ url_for('reparaciones') }}" class="list-group-item list-group-item-action">
+                    <i class="fas fa-tools me-2"></i> Reparaciones
+                </a>
+                <a href="{{ url_for('mercaderia_fallada') }}" class="list-group-item list-group-item-action">
+                    <i class="fas fa-times-circle me-2"></i> Mercadería Fallada
+                </a>
+                <a href="{{ url_for('productos_mas_vendidos') }}" class="list-group-item list-group-item-action">
+                    <i class="fas fa-star me-2"></i> Productos Más Vendidos
+                </a>
+                <a href="{{ url_for('logout') }}" class="list-group-item list-group-item-action list-group-item-logout">
+                    <i class="fas fa-sign-out-alt me-2"></i> Cerrar Sesión
+                </a>
+
+            </div>
+        </div>
+        <!-- /#sidebar-wrapper -->
+
+        <!-- Page Content -->
+        <div id="page-content-wrapper" class="container-fluid">
+            {% block content %}{% endblock %}
+        </div>
+        <!-- /#page-content-wrapper -->
+    </div>
+    <!-- /#wrapper -->
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Script para mostrar/ocultar el sidebar en móviles
+        document.getElementById('sidebarToggle').addEventListener('click', function() {
+            document.getElementById('sidebar-wrapper').classList.toggle('active');
+        });
+    </script>
+</body>
+</html>

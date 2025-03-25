@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="p-6 bg-gray-900 text-white min-h-screen">
+    <h1 class="text-3xl font-bold text-center mb-8">Caja Diaria</h1>
+
+    <!-- Selector de fechas -->
+    <div class="mb-8">
+        <form method="get" action="{{ url_for('caja') }}" class="flex justify-center gap-4">
+            <input type="date" name="fecha_desde" value="{{ fecha_desde }}" class="bg-gray-800 text-white p-2 rounded-lg">
+            <input type="date" name="fecha_hasta" value="{{ fecha_hasta }}" class="bg-gray-800 text-white p-2 rounded-lg">
+            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">Filtrar</button>
+        </form>
+    </div>
+
+    <!-- KPIs de Neto por Tipo de Pago -->
+    <div class="mb-8">
+        <h2 class="text-2xl font-semibold mb-4">Neto por Tipo de Pago</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <!-- Efectivo -->
+            <div class="bg-gradient-to-r from-green-600 to-green-800 p-6 rounded-lg shadow-lg text-center">
+                <h3 class="text-xl font-semibold mb-2">Efectivo</h3>
+                <p class="text-3xl font-bold">${{ neto_por_pago.get('Efectivo', 0) | round(2) }}</p>
+            </div>
+
+            <!-- Transferencias -->
+            <div class="bg-gradient-to-r from-blue-600 to-blue-800 p-6 rounded-lg shadow-lg text-center">
+                <h3 class="text-xl font-semibold mb-2">Transferencias</h3>
+                <p class="text-3xl font-bold">${{ neto_por_pago.get('Transferencia', 0) | round(2) }}</p>
+            </div>
+
+            <!-- Tarjeta de Crédito -->
+            <div class="bg-gradient-to-r from-purple-600 to-purple-800 p-6 rounded-lg shadow-lg text-center">
+                <h3 class="text-xl font-semibold mb-2">Crédito</h3>
+                <p class="text-3xl font-bold">${{ neto_por_pago.get('Crédito', 0) | round(2) }}</p>
+            </div>
+
+            <!-- Tarjeta de Débito -->
+            <div class="bg-gradient-to-r from-yellow-600 to-yellow-800 p-6 rounded-lg shadow-lg text-center">
+                <h3 class="text-xl font-semibold mb-2">Débito</h3>
+                <p class="text-3xl font-bold">${{ neto_por_pago.get('Débito', 0) | round(2) }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráfico de barras -->
+    <div class="mb-8">
+        <h2 class="text-2xl font-semibold mb-4">Gráfico de Ventas</h2>
+        <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+            <canvas id="ventasChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Botón para volver al inicio -->
+    <div class="mt-8 text-center">
+        <a href="{{ url_for('index') }}" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition duration-300">Volver al Inicio</a>
+    </div>
+</div>
+
+<!-- Scripts para Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Datos para el gráfico de barras
+    const ventasData = {
+        labels: {{ neto_por_pago.keys() | list | tojson | safe }},  // Tipos de pago
+        datasets: [{
+            label: 'Neto por Tipo de Pago',
+            data: {{ neto_por_pago.values() | list | tojson | safe }},  // Valores netos
+            backgroundColor: [
+                'rgba(75, 192, 192, 0.6)',  // Verde (Efectivo)
+                'rgba(54, 162, 235, 0.6)',  // Azul (Transferencia)
+                'rgba(153, 102, 255, 0.6)', // Morado (Crédito)
+                'rgba(255, 206, 86, 0.6)'  // Amarillo (Débito)
+            ],
+            borderColor: [
+                'rgba(75, 192, 192, 1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(153, 102, 255, 1)',
+                'rgba(255, 206, 86, 1)'
+            ],
+            borderWidth: 1
+        }]
+    };
+
+    // Configuración del gráfico de barras
+    const ventasConfig = {
+        type: 'bar',
+        data: ventasData,
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    },
+                    ticks: {
+                        color: 'white'
+                    }
+                },
+                x: {
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    },
+                    ticks: {
+                        color: 'white'
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    labels: {
+                        color: 'white'
+                    }
+                }
+            }
+        }
+    };
+
+    // Renderizar el gráfico de barras
+    const ventasChart = new Chart(
+        document.getElementById('ventasChart'),
+        ventasConfig
+    );
+</script>
+{% endblock %}

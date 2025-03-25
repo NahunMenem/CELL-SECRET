@@ -1,0 +1,47 @@
+{% extends "base.html" %}  <!-- Asegúrate de que "base.html" sea el nombre de tu plantilla base -->
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="text-3xl font-bold mb-6">Dashboard - Productos Más Vendidos</h1>
+
+    <!-- Resumen de ventas -->
+    <div class="bg-gray-800 p-6 rounded-lg mb-6">
+        <h2 class="text-xl font-semibold mb-4">Resumen de Ventas</h2>
+        <p class="text-lg">
+            <span class="font-bold">Total de ventas:</span> {{ total_ventas }} unidades
+        </p>
+    </div>
+
+    <!-- Tabla de productos más vendidos -->
+    <div class="bg-gray-800 p-6 rounded-lg">
+        <h2 class="text-xl font-semibold mb-4">Top 5 Productos Más Vendidos</h2>
+        <table class="min-w-full">
+            <thead class="bg-gray-700">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Nombre</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Precio</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Cantidad Vendida</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Porcentaje de Ventas</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-700">
+                {% for producto in productos %}
+                <tr class="hover:bg-gray-750">
+                    <td class="px-6 py-4 whitespace-nowrap">{{ producto.nombre }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${{ producto.precio }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ producto.cantidad_vendida }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                            <div class="w-full bg-gray-700 rounded-full h-2.5">
+                                <div class="bg-blue-500 h-2.5 rounded-full" style="width: {{ producto.porcentaje }}%"></div>
+                            </div>
+                            <span class="ml-2">{{ producto.porcentaje }}%</span>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
