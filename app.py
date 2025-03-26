@@ -123,6 +123,7 @@ def logout():
     return redirect(url_for('login'))
 
 # Ruta para registrar ventas
+# Ruta para registrar ventas
 @app.route('/registrar_venta', methods=['GET', 'POST'])
 def registrar_venta():
     conn = get_db_connection()
@@ -137,9 +138,9 @@ def registrar_venta():
         if 'buscar' in request.form:
             busqueda = request.form['busqueda']
             cursor.execute('''
-            SELECT id, nombre, codigo_barras, stock, precio FROM productos_secret
+            SELECT id, nombre, codigo_barras, stock, precio FROM productos
             WHERE codigo_barras = %s OR nombre ILIKE %s
-        ''', (busqueda, f'%{busqueda}%'))
+            ''', (busqueda, f'%{busqueda}%'))
             productos = cursor.fetchall()
             conn.close()
             return render_template('registrar_venta.html', productos=productos, carrito=session['carrito'])
@@ -150,13 +151,13 @@ def registrar_venta():
             cantidad = int(request.form['cantidad'])
 
             # Obtener detalles del producto
-            cursor.execute('SELECT id, nombre, precio FROM productos_secret WHERE id = %s', (producto_id,))
+            cursor.execute('SELECT id, nombre, precio FROM productos WHERE id = %s', (producto_id,))
             producto = cursor.fetchone()
 
             if producto:
                 if producto['precio'] is not None:
                     # Verificar si hay suficiente stock
-                    cursor.execute('SELECT stock FROM productos_secret WHERE id = %s', (producto_id,))
+                    cursor.execute('SELECT stock FROM productos WHERE id = %s', (producto_id,))
                     stock = cursor.fetchone()['stock']
 
                     if stock >= cantidad:
@@ -164,12 +165,11 @@ def registrar_venta():
                         item = {
                             'id': producto['id'],
                             'nombre': producto['nombre'],
-                            'precio': producto['precio'],
-                            'cantidad': cantidad
+                            'precio': float(producto['precio']),
+                            'cantidad': int(cantidad)
                         }
                         session['carrito'].append(item)
                         session.modified = True
-            
                     else:
                         flash(f'No hay suficiente stock para "{producto["nombre"]}"', 'error')
                 else:
@@ -185,7 +185,7 @@ def registrar_venta():
 
             # Agregar venta manual al carrito
             item = {
-                'id': None,  # No tiene ID porque no está en el stock
+                'id': None,
                 'nombre': nombre,
                 'precio': precio,
                 'cantidad': cantidad
@@ -210,23 +210,23 @@ def registrar_venta():
             for item in session['carrito']:
                 producto_id = item['id']
                 nombre = item['nombre']
-                precio = item['precio']
-                cantidad = item['cantidad']
+                precio = float(item['precio'])
+                cantidad = int(item['cantidad'])
 
                 if producto_id is not None:
-                    # Verificar si hay suficiente stock (solo para productos en stock)
-                    cursor.execute('SELECT stock FROM productos_secret WHERE id = %s', (producto_id,))
+                    # Verificar si hay suficiente stock
+                    cursor.execute('SELECT stock FROM productos WHERE id = %s', (producto_id,))
                     producto = cursor.fetchone()
 
                     if producto and producto['stock'] >= cantidad:
                         # Registrar la venta en la tabla 'ventas'
                         cursor.execute('''
-                            INSERT INTO ventas_secret (producto_id, cantidad, fecha, nombre_manual, precio_manual, tipo_pago, dni_cliente)
+                            INSERT INTO ventas (producto_id, cantidad, fecha, nombre_manual, precio_manual, tipo_pago, dni_cliente)
                             VALUES (%s, %s, %s, %s, %s, %s, %s)
                         ''', (producto_id, cantidad, fecha_actual, None, None, tipo_pago, dni_cliente))
 
                         # Actualizar el stock
-                        cursor.execute('UPDATE productos_secret SET stock = stock - %s WHERE id = %s', (cantidad, producto_id))
+                        cursor.execute('UPDATE productos SET stock = stock - %s WHERE id = %s', (cantidad, producto_id))
                     else:
                         conn.close()
                         flash(f'No hay suficiente stock para el producto: {nombre}', 'error')
@@ -234,13 +234,13 @@ def registrar_venta():
                 else:
                     # Registrar venta manual en la tabla 'reparaciones'
                     cursor.execute('''
-                        INSERT INTO reparaciones_secret (nombre_servicio, precio, cantidad, tipo_pago, dni_cliente, fecha)
+                        INSERT INTO reparaciones (nombre_servicio, precio, cantidad, tipo_pago, dni_cliente, fecha)
                         VALUES (%s, %s, %s, %s, %s, %s)
                     ''', (nombre, precio, cantidad, tipo_pago, dni_cliente, fecha_actual))
 
             conn.commit()
             conn.close()
-            session.pop('carrito', None)  # Vaciar el carrito después de registrar la venta
+            session.pop('carrito', None)
             flash('Venta registrada con éxito', 'success')
             return redirect(url_for('registrar_venta'))
 
@@ -250,10 +250,9 @@ def registrar_venta():
             flash('Carrito vaciado con éxito', 'success')
             return redirect(url_for('registrar_venta'))
 
-    # Calcular el total del carrito
-    total = sum(item['precio'] * item['cantidad'] for item in session['carrito'])
+    # Calcular el total del carrito asegurando que los valores sean numéricos
+    total = sum(float(item['precio']) * int(item['cantidad']) for item in session['carrito'])
 
-    # Si es GET, mostrar el formulario de búsqueda
     conn.close()
     return render_template('registrar_venta.html', productos=None, carrito=session['carrito'], total=total)
 
