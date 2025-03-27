@@ -138,7 +138,7 @@ def registrar_venta():
         if 'buscar' in request.form:
             busqueda = request.form['busqueda']
             cursor.execute('''
-            SELECT id, nombre, codigo_barras, stock, precio FROM productos
+            SELECT id, nombre, codigo_barras, stock, precio FROM productos_secret
             WHERE codigo_barras = %s OR nombre ILIKE %s
             ''', (busqueda, f'%{busqueda}%'))
             productos = cursor.fetchall()
@@ -151,13 +151,13 @@ def registrar_venta():
             cantidad = int(request.form['cantidad'])
 
             # Obtener detalles del producto
-            cursor.execute('SELECT id, nombre, precio FROM productos WHERE id = %s', (producto_id,))
+            cursor.execute('SELECT id, nombre, precio FROM productos_secret WHERE id = %s', (producto_id,))
             producto = cursor.fetchone()
 
             if producto:
                 if producto['precio'] is not None:
                     # Verificar si hay suficiente stock
-                    cursor.execute('SELECT stock FROM productos WHERE id = %s', (producto_id,))
+                    cursor.execute('SELECT stock FROM productos_secret WHERE id = %s', (producto_id,))
                     stock = cursor.fetchone()['stock']
 
                     if stock >= cantidad:
@@ -215,18 +215,18 @@ def registrar_venta():
 
                 if producto_id is not None:
                     # Verificar si hay suficiente stock
-                    cursor.execute('SELECT stock FROM productos WHERE id = %s', (producto_id,))
+                    cursor.execute('SELECT stock FROM productos_secret WHERE id = %s', (producto_id,))
                     producto = cursor.fetchone()
 
                     if producto and producto['stock'] >= cantidad:
                         # Registrar la venta en la tabla 'ventas'
                         cursor.execute('''
-                            INSERT INTO ventas (producto_id, cantidad, fecha, nombre_manual, precio_manual, tipo_pago, dni_cliente)
+                            INSERT INTO ventas_secret (producto_id, cantidad, fecha, nombre_manual, precio_manual, tipo_pago, dni_cliente)
                             VALUES (%s, %s, %s, %s, %s, %s, %s)
                         ''', (producto_id, cantidad, fecha_actual, None, None, tipo_pago, dni_cliente))
 
                         # Actualizar el stock
-                        cursor.execute('UPDATE productos SET stock = stock - %s WHERE id = %s', (cantidad, producto_id))
+                        cursor.execute('UPDATE productos_secret SET stock = stock - %s WHERE id = %s', (cantidad, producto_id))
                     else:
                         conn.close()
                         flash(f'No hay suficiente stock para el producto: {nombre}', 'error')
@@ -234,7 +234,7 @@ def registrar_venta():
                 else:
                     # Registrar venta manual en la tabla 'reparaciones'
                     cursor.execute('''
-                        INSERT INTO reparaciones (nombre_servicio, precio, cantidad, tipo_pago, dni_cliente, fecha)
+                        INSERT INTO reparaciones_secret (nombre_servicio, precio, cantidad, tipo_pago, dni_cliente, fecha)
                         VALUES (%s, %s, %s, %s, %s, %s)
                     ''', (nombre, precio, cantidad, tipo_pago, dni_cliente, fecha_actual))
 
